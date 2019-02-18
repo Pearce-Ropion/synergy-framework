@@ -1,0 +1,12 @@
+{% extends "app.jinja2" %}
+
+{% block customcss %}
+    <link href="{{request.static_url('synergy:static/theme.css')}}" rel="stylesheet">
+{% endblock customcss %}
+
+{% block customcontent %}
+    <div class="content">
+        <h1><span class="font-semi-bold">Synergy</span> <span class="smaller">Visualization Dashboard</span></h1>
+        <p class="lead"><span class="font-semi-bold">404</span> Page Not Found</p>
+    </div>
+{% endblock customcontent %}
