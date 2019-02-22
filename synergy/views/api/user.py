@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from api.utils import generateJSONResponse
+from ...api.utils.generateJSONResponse import generateJSONResponse
 
 def switch_action(type):
     actions = {
@@ -11,7 +11,7 @@ def switch_action(type):
     return actions.get(type, 'default1')
 
 @view_config(route_name='user', renderer='json', request_method='POST')
-def login_handler(request):
+def user_handler(request):
     action = request.json_body
     if 'type' in action and 'payload' in action:
         x = switch_action(action['type'])

@@ -1,4 +1,3 @@
-user = 'lux'
-password = 'password'
+user = 'synergy'
+password = 'wonderland'
 database = 'synergy'
-
