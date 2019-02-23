@@ -1,24 +1,30 @@
-import mysql.connector as mariadb
-import config
 from uuid import uuid4 as uuidv4
 
+import mysql.connector as mariadb
+
+from ..api.utils.response import reportError
+
+config = {
+    'user': 'synergy',
+    'password': 'wonderland',
+    'host': '192.168.0.39',
+    'port': 3306,
+    'database': 'synergy',
+    'raise_on_warnings': True
+}
 
 def connectDB():
     try:
-        conn = mariadb.connect(
-            user=config.user,
-            password=config.password,
-            database=config.database
-        )
-        cursor = conn.cursor
+        conn = mariadb.connect(**config)
+        cursor = conn.cursor(dictionary=True)
         conn.autocommit = True
 
         return conn, cursor
 
     except Exception as error:
-        print('SQL Error: Unable to connect to MySQL database')
-        print(error)
-        return None
+        response = reportError(
+            'SQL Error: Unable to connect to Synergy database', error)
+        return response
 
 
 def closeDB(conn, cursor):
@@ -27,8 +33,9 @@ def closeDB(conn, cursor):
         conn.close()
 
     except Exception as error:
-        print('SQL Error: Unable to close connection to MySQL database')
-        print(error)
+        response = reportError(
+            'Error connections to Synergy database', error)
+        return response
 
 
 def total_usage():
