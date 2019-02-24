@@ -1,5 +1,7 @@
 from pyramid.response import Response
 
+from .reporter import reportError
+
 def defaultResponse(*payload):
     return reportError('Invalid action type', None)
 
@@ -20,20 +22,10 @@ def responseSuccess(payload, type):
     return JSONResponse(response, 200)
 
 
-def responseError(error, type, status):
+def responseError(errors, type, status):
     response = {
         'type': type,
         'valid': False,
-        'error': error,
+        'errors': errors,
     }
     return JSONResponse(response, status)
-
-
-def reportError(message, error=''):
-    errorMsg = {
-        'message': message,
-        'error': str(error) if error is not None else None,
-    }
-
-    print(errorMsg)
-    return errorMsg

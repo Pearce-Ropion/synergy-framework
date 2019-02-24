@@ -2,7 +2,7 @@ from uuid import uuid4 as uuidv4
 
 import mysql.connector as mariadb
 
-from ..api.utils.response import reportError
+from ..api.utils.reporter import reportError
 
 config = {
     'user': 'synergy',
@@ -265,108 +265,3 @@ def set_device_name(device_id, name):
         closeDB(conn, cursor)
 
     closeDB(conn, cursor)
-
-
-def set_group_name(group_id, name):
-    conn, cursor = connectDB()
-
-    try:
-        cols = ['groupID', 'name']
-        vals = [group_id, name]
-        query_placeholders = ', '.join(['%s'] * len(vals))
-        query_columns = ', '.join(cols)
-        insert_query = ''' INSERT INTO groups (%s) VALUES (%s) ON DUPLICATE KEY UPDATE name=(%s)''' % (
-            query_columns, query_placeholders, name)
-
-        try:
-            cursor.execute(insert_query, vals)
-
-        except Exception as error:
-            print(''' SQL Error: Unable to set group name for group %s''' %
-                  (group_id))
-            print(error)
-            closeDB(conn, cursor)
-
-    except Exception as error:
-        print('Error generating query for group name insertion')
-        print(error)
-        closeDB(conn, cursor)
-
-    closeDB(conn, cursor)
-
-
-def get_groupies(group_id):
-    conn, cursor = connectDB()
-
-    try:
-        query = ''' SELECT * FROM groupings WHERE groupID = (%s) ''' % (
-            group_id)
-
-        try:
-            cursor.execute(query)
-            groupies = cursor.fetchall()
-            closeDB(conn, cursor)
-            return groupies
-
-        except Exception as error:
-            print(
-                ''' SQL Error: Unable to fetch group members for group %s''' % (group_id))
-            print(error)
-            closeDB(conn, cursor)
-            return None
-
-    except Exception as error:
-        print('Error generating query for group member selection')
-        print(error)
-        closeDB(conn, cursor)
-        return None
-
-    closeDB(conn, cursor)
-    return None
-
-
-def add_groupie(group_id, uuid):
-    conn, cursor = connectDB()
-
-    try:
-        cols = ['groupId', 'uuid']
-        vals = [group_id, uuid]
-        query_placeholders = ', '.join(['%s'] * len(vals))
-        query_columns = ', '.join(cols)
-        query = ''' INSERT INTO groupings (%s) VALUES (%s) ''' % (
-            query_columns, query_placeholders)
-
-        try:
-            cursor.execute(query, vals)
-
-        except Exception as error:
-            print(''' SQL Error: Unable to insert item %s into group with id = %s''' % (
-                uuid, group_id))
-            print(error)
-            closeDB(conn, cursor)
-
-    except Exception as error:
-        print('Error generating query for group member insertion')
-        print(error)
-        closeDB(conn, cursor)
-
-    closeDB(conn, cursor)
-
-
-def create_group(name, *ids):
-    group_id = str(uuidv4())
-
-    try:
-        set_group_name(group_id, name)
-
-        try:
-            for i in range(len(ids)):
-                add_groupie(group_id, ids[i])
-
-        except Exception as error:
-            print(''' Unable to add member groups to group: %s ''' % (name))
-            print(error)
-
-    except Exception as error:
-        print(''' Unable to add group with name: %s ''' % (name))
-        print(error)

@@ -1,6 +1,7 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from ...api.utils.response import responseSuccess, responseError, reportError, defaultResponse
+from ...api.utils.reporter import reportError
+from ...api.utils.response import responseSuccess, responseError, defaultResponse
 from ...database.users import create_user, get_user, update_user, delete_user
 
 def switch_action(type):
@@ -28,7 +29,7 @@ def user_handler(request):
                 return responseError(response, actionType, 400)
 
         except Exception as error:
-            response = reportError('An error occurred handling the user request', error)
+            response = reportError('An error occured handling the user request', error)
             return responseError(response, actionType, 500)
 
     response = reportError('The user request was not formatted correctly', None)
