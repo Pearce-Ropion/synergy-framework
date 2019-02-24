@@ -51,16 +51,23 @@ def create_user(payload):
     return responseError
 
 
-def get_user(payload, ifExists = False):
+def get_user(payload, ifExists = False, isLogin = False):
     conn, cursor = connectDB()
 
+    key = 'email' if ifExists else 'userID'
+    key = 'email' if isLogin else key
+    item = 'Email' if key == 'email' else 'ID'
+
     try:
-        query = ''' SELECT * FROM users WHERE email = '%s' ''' % (
-            payload['email'])
+        query = ''' SELECT * FROM users WHERE %s = '%s' ''' % (
+            key, payload[key])
         cursor.execute(query)
         users = cursor.fetchall()
 
-        if len(users) > 0 and ifExists:
+        if len(users) > 0 and isLogin:
+            closeDB(conn, cursor)
+            return users[0]
+        elif len(users) > 0 and ifExists:
             closeDB(conn, cursor)
             return True
         elif len(users) == 0 and ifExists:
@@ -70,18 +77,18 @@ def get_user(payload, ifExists = False):
             return users[0]
         else:
             responseError = reportError(
-                'No users were found with email: {}'.format(payload['email']), None)
+                'No users were found with the specified {}: {}'.format(item, payload[key]), None)
             closeDB(conn, cursor)
             return responseError
 
     except Exception as error:
         responseError = reportError(
-            'SQL ERROR: An error occured getting user with email: {}'.format(payload['email']), error)
+            'SQL ERROR: An error occured getting user with the specified {}: {}'.format(item, payload[key]), error)
         closeDB(conn, cursor)
         return responseError
 
     responseError = reportError(
-        'An error occured getting user with email: {}'.format(payload['email']), None)
+        'An error occured getting user with the specified {}: {}'.format(item, payload[key]), None)
     closeDB(conn, cursor)
     return responseError
 
@@ -107,18 +114,18 @@ def update_user(payload):
 
         except Exception as error:
             responseError = reportError(
-                'SQL ERROR: An error occured updating user with email: {}'.format(payload['email']), error)
+                'SQL ERROR: An error occured updating user with the specified ID: {}'.format(payload['userID']), error)
             closeDB(conn, cursor)
             return responseError
 
     except Exception as error:
         responseError = reportError(
-            'An error occured updating user with email: {}'.format(payload['email']), error)
+            'An error occured updating user with the specified ID: {}'.format(payload['userID']), error)
         closeDB(conn, cursor)
         return responseError
 
     responseError = reportError(
-        'An error occured updating user with email: {}'.format(payload['email']), None)
+        'An error occured updating user with the specified ID: {}'.format(payload['userID']), None)
     closeDB(conn, cursor)
     return responseError
 
@@ -135,11 +142,11 @@ def delete_user(payload):
 
     except Exception as error:
         responseError = reportError(
-            'SQL ERROR: An error occured deleting user with id: {}'.format(payload['userID']), error)
+            'SQL ERROR: An error occured deleting user with the specified ID: {}'.format(payload['userID']), error)
         closeDB(conn, cursor)
         return responseError
 
     responseError = reportError(
-        'An error occured deleting user with id: {}'.format(payload['userID']), None)
+        'An error occured deleting user with the specified ID: {}'.format(payload['userID']), None)
     closeDB(conn, cursor)
     return responseError

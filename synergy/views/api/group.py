@@ -1,5 +1,3 @@
-import json
-
 from pyramid.view import view_config
 from pyramid.response import Response
 
@@ -38,5 +36,5 @@ def group_handler(request):
             return responseError(response, actionType, 500)
 
     response = reportError(
-        'The user request was not formatted correctly', None)
-    return responseError(response, actionType, 400)
+        'The group request was not formatted correctly', None)
+    return responseError(response, None, 400)
