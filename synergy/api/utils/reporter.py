@@ -3,7 +3,10 @@ def reportError(message, error=''):
         'message': message,
         'error': str(error) if error is not None else None,
     }
-    print(message, error, sep='\n')
+    if error is None:
+        print(message)
+    else:
+        print(message, error, sep='\n')
     return errorMsg
 
 def isError(error):
