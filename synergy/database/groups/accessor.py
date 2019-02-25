@@ -1,8 +1,12 @@
 from uuid import uuid4 as uuidv4
 
 from ..database import connectDB, closeDB
-from ...api.utils.reporter import isError, reportError
+from ..devices.devices import get_device
+from ..devices.channels import get_channels
 from ..utils import listify
+
+from ...api.utils.reporter import isError, reportError
+
 
 def set_group_name(payload):
     conn, cursor = connectDB()
@@ -39,12 +43,13 @@ def add_groupie(payload):
     conn, cursor = connectDB()
 
     try:
+        # check if this group to group member combination already exists
         exists_query = ''' SELECT * FROM groupings WHERE groupID = '%s' AND uuid = '%s' ''' % (
             payload['groupID'], payload['uuid'])
         cursor.execute(exists_query)
         groupings = cursor.fetchall()
 
-        if not len(groupings) > 0:
+        if len(groupings) == 0:
             try:
                 insert = listify(payload)
                 query = ''' INSERT INTO groupings (%s) VALUES (%s) ''' % (
@@ -114,6 +119,7 @@ def remove_groupie(payload):
     closeDB(conn, cursor)
     return responseError
 
+
 def get_group_name(payload):
     conn, cursor = connectDB()
 
@@ -142,8 +148,22 @@ def get_group_name(payload):
     closeDB(conn, cursor)
     return responseError
 
+
 def get_groupies(payload):
     conn, cursor = connectDB()
+
+    try:
+        group = get_group_name(payload)
+
+        if isError(group):
+            closeDB(conn, cursor)
+            return group
+
+    except Exception as error:
+        responseError = reportError('An error occured retrieving the group name with the specified ID: {}'.format(payload['groupID']), error)
+        closeDB(conn, cursor)
+        return responseError
+
 
     try:
         query = ''' SELECT * FROM groupings WHERE groupID = '%s' ''' % (
@@ -151,8 +171,52 @@ def get_groupies(payload):
         cursor.execute(query)
         members = cursor.fetchall()
 
+        all = {
+            'groupID': group['groupID'],
+            'name': group['name'],
+            'groups': [],
+            'devices': [],
+            'channels': [],
+        }
         if len(members) > 0:
-            return members
+            for member in members:
+                if member['type'] == 'group':
+                    result = get_groupies({
+                        'groupID': member['uuid'],
+                    })
+
+                    if isError(result):
+                        closeDB(conn, cursor)
+                        return result
+                    
+                    all['groups'].append(result)
+
+                elif member['type'] == 'device':
+                    result = get_device({
+                        'deviceID':  member['uuid']
+                    }, True)
+
+                    if isError(result):
+                        closeDB(conn, cursor)
+                        return result
+                    
+                    all['devices'].append(result)
+
+                elif member['type'] == 'channel':
+                    result = get_channels({
+                        'channelID': member['uuid']
+                    })
+
+                    if isError(result):
+                        closeDB(conn, cursor)
+                        return result
+
+                    all['channels'].append(result)
+
+            if len(all['groups']) == 0 and len(all['devices']) == 0 and len(all['channels']) == 0:
+                return members
+
+            return all
         else:
             responseError = reportError(
                 'No group members were found for the specified group ID', None)
