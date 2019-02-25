@@ -32,7 +32,7 @@ def group_handler(request):
 
         except Exception as error:
             response = reportError(
-                'An error occured handling the user request', error)
+                'An error occured handling the group request', error)
             return responseError(response, actionType, 500)
 
     response = reportError(

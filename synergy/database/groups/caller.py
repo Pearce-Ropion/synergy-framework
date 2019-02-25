@@ -26,13 +26,15 @@ def create_group(payload):
 
     if 'members' in payload and isinstance(payload['members'], list):
         try:
-            if len(payload['members']) > 0:
+            members = payload['members']
+            if len(members) > 0:
                 response['members'] = []
 
-            for i in range(len(payload['members'])):
+            for i in range(len(members)):
                 result = add_groupie({
                     'groupID': group_id,
-                    'uuid': payload['members'][i],
+                    'uuid': members[i]['uuid'],
+                    'type': members[i]['type'],
                 })
 
                 if isError(result):
@@ -56,18 +58,6 @@ def create_group(payload):
 def get_group(payload):
     errors = []
     response = {}
-
-    try:
-        result = get_group_name(payload)
-
-        if isError(result):
-            errors.append(result)
-        else:
-            response = result
-
-    except Exception as error:
-        errors.append(reportError(
-            'An error occured retrieving the name of the group with the specified ID: {}'.format(payload['groupID']), error))
 
     try:
         result = get_groupies(payload)
@@ -115,14 +105,15 @@ def update_group(payload):
     
     if 'add' in payload:
         try:
-
-            if len(payload['add']) > 0:
+            members = payload['add']
+            if len(members) > 0:
                 response['added'] = []
 
-            for i in range(len(payload['add'])):
+            for i in range(len(members)):
                 result = add_groupie({
                     'groupID': payload['groupID'],
-                    'uuid': payload['add'][i],
+                    'uuid': members[i]['uuid'],
+                    'type': members[i]['type'],
                 })
 
                 if isError(result):
