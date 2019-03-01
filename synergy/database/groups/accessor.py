@@ -1,6 +1,7 @@
 from uuid import uuid4 as uuidv4
 
 from ..database import connectDB, closeDB
+from ..members import get_members
 from ..devices.devices import get_device
 from ..devices.channels import get_channels
 from ..utils import listify
@@ -171,7 +172,7 @@ def get_groupies(payload, channels = []):
         cursor.execute(query)
         members = cursor.fetchall()
 
-        all = {
+        accumulator = {
             'groupID': group['groupID'],
             'name': group['name'],
             'groups': [],
@@ -179,52 +180,14 @@ def get_groupies(payload, channels = []):
             'channels': [],
             'allChannels': [],
         }
-        if len(members) > 0:
-            for member in members:
-                if member['type'] == 'group':
-                    result = get_groupies({
-                        'groupID': member['uuid'],
-                    }, channels)
 
-                    if isError(result):
-                        closeDB(conn, cursor)
-                        return result
-                    
-                    all['groups'].append(result)
+        result = get_members(members, accumulator, channels)
 
-                elif member['type'] == 'device':
-                    result = get_device({
-                        'deviceID':  member['uuid']
-                    }, True, channels)
-
-                    if isError(result):
-                        closeDB(conn, cursor)
-                        return result
-                    
-                    all['devices'].append(result)
-
-                elif member['type'] == 'channel':
-                    result = get_channels({
-                        'channelID': member['uuid']
-                    })
-
-                    if isError(result):
-                        closeDB(conn, cursor)
-                        return result
-
-                    all['channels'].append(result)
-                    channels.append(result)
-
-            if len(all['groups']) == 0 and len(all['devices']) == 0 and len(all['channels']) == 0:
-                return members
-
-            all['allChannels'] = channels
-            return all
-        else:
-            responseError = reportError(
-                'No group members were found for the specified group ID', None)
+        if isError(result):
             closeDB(conn, cursor)
-            return responseError
+            return result
+        else:
+            return accumulator
 
     except Exception as error:
         responseError = reportError(

@@ -4,7 +4,7 @@ def includeme(config):
     config.add_route('login', '/login')
     config.add_route('user', '/api/user')
     config.add_route('usage', '/api/usage')
-    config.add_route('history', '/api/history')
+    config.add_route('members', '/api/members')
     config.add_route('device', '/api/device')
     config.add_route('channel', '/api/channel')
     config.add_route('group', '/api/group')
