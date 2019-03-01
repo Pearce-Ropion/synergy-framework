@@ -1,115 +1,94 @@
 from ..database import connectDB, closeDB
 
-def total_usage():
+from ...api.utils.reporter import reportError
+
+def usage(payload):
     conn, cursor = connectDB()
 
     try:
-        col_list = ['time', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5',
-                    'ch6', 'ch7', 'ch8', 'ch9', 'ch10', 'ch11', 'ch12']
-        query_columns = ', '.join(col_list)
-        query = ''' SELECT (%s) FROM usages ''' % (query_columns)
+        is_cumulative = False
+        include_where_clause = False
+        is_inital_param = True
+        after_clause = ''
+        before_clause = ''
+
+        if 'include' not in payload or len(payload['include']) == 0:
+            is_cumulative = True
+        if 'after' in payload:
+            # Any time after the given value (inclusive)
+            after_clause = ' AND time >= {}'.format(payload['after'])
+            include_where_clause = True
+            if is_inital_param:
+                after_clause = after_clause[3:]
+                is_inital_param = False
+        if 'before' in payload:
+            # Any time before the give value (inclusive)
+            before_clause = ' AND time <= {}'.format(payload['before'])
+            include_where_clause = True
+            if is_inital_param:
+                before_clause = before_clause[4:]
+                is_inital_param = False
 
         try:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            closeDB(conn, cursor)
-            return result
+            if is_cumulative:
+                where_clause = ' WHERE' if include_where_clause else ''
+                query = ''' SELECT * FROM usages%s%s%s ''' % (where_clause, after_clause, before_clause)
+
+                try:
+                    cursor.execute(query)
+                    currents = cursor.fetchall()
+                    print(currents)
+
+                    if len(currents):
+                        payload['currents'] = currents
+                    else:
+                        payload['currents'] = []
+                    
+                    return payload
+
+                except Exception as error:
+                    responseError = reportError(
+                        'SQL ERROR: An error occured fetching the available currents', error)
+                    closeDB(conn, cursor)
+                    return responseError
+
+            else:
+                for channel in payload['include']:
+                    channel_num = 'ch' + str(channel['position'])
+                    query = ''' SELECT %s FROM usages WHERE deviceID = '%s'%s%s ''' % (
+                        channel_num, channel['deviceID'], after_clause, before_clause)
+
+                    try:
+                        cursor.execute(query)
+                        current = cursor.fetchall()
+
+                        if len(current):
+                            # Since we are only getting a single column we can assume type safety of current[0][channel_num]
+                            channel['current'] = current[0][channel_num]
+                        else:
+                            channel['current'] = None
+
+                    except Exception as error:
+                        responseError = reportError(
+                            'SQL ERROR: An error occured fetching current with the specified ID', error)
+                        closeDB(conn, cursor)
+                        return responseError
+                
+                return payload['include']
 
         except Exception as error:
-            print(''' SQL Error: Unable to fetch total usage statistics''')
-            print(error)
+            responseError = reportError(
+                'An error occured fetching the specified currents', error)
             closeDB(conn, cursor)
-            return None
+            return responseError
 
     except Exception as error:
-        print('Error generating query for total usage statistics')
-        print(error)
+        responseError = reportError(
+            'An error occured resolving the parameters of the query', error)
         closeDB(conn, cursor)
-        return None
+        return responseError
 
+    responseError = reportError(
+        'An error occured resolving the parameters of the query', None)
     closeDB(conn, cursor)
-    return None
-
-
-def device_usage(device_id):
-    conn, cursor = connectDB()
-
-    try:
-        col_list = ['time', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5',
-                    'ch6', 'ch7', 'ch8', 'ch9', 'ch10', 'ch11', 'ch12']
-        query_columns = ', '.join(col_list)
-        query = ''' SELECT (%s) FROM usages WHERE deviceID = (%s) ''' % (
-            query_columns, device_id)
-
-        try:
-            cursor.execute(query)
-            result = cursor.fetchall()
-            closeDB(conn, cursor)
-            return result
-
-        except Exception as error:
-            print(
-                ''' SQL Error: Unable to fetch device usages for device %s''' % (device_id))
-            print(error)
-            closeDB(conn, cursor)
-            return None
-
-    except Exception as error:
-        print('Error generating query for device usage selection')
-        print(error)
-        closeDB(conn, cursor)
-        return None
-
-    closeDB(conn, cursor)
-    return None
-
-
-def ch_usage(ch_id):
-    conn, cursor = connectDB()
-
-    try:
-        device_from_channel_query = ''' SELECT deviceID FROM channels WHERE channelID = (%s) ''' % (
-            ch_id)
-        cursor.execute(device_from_channel_query)
-
-        try:
-            device_id = cursor.fetchall()
-            channel_column_position_query = ''' SELECT * FROM devices WHERE deviceID = (%s) ''' % (
-                device_id)
-            cursor.execute(channel_column_position_query)
-
-            try:
-                all_chs = cursor.fetchall()
-                channel_idx = all_chs.index(ch_id)
-                col = "ch" + str(channel_idx - 2)
-
-                channel_usage_query = ''' SELECT (%s) FROM usages WHERE deviceID = (%s) ''' % (
-                    col, device_id)
-                cursor.execute(channel_usage_query)
-                result = cursor.fetchall()
-
-                closeDB(conn, cursor)
-                return result
-
-            except Exception as error:
-                print(
-                    ''' SQL Error: Unable to get usage data for channel %s''' % (ch_id))
-                print(error)
-                closeDB(conn, cursor)
-                return None
-
-        except Exception as error:
-            print(
-                ''' SQL Error: Unable to get channel ID position for channel %s''' % (ch_id))
-            print(error)
-            closeDB(conn, cursor)
-            return None
-
-    except Exception as error:
-        print(''' SQL Error: Unable to get device ID for channel %s''' % (ch_id))
-        print(error)
-        closeDB(conn, cursor)
-        return None
-
-    closeDB(conn, cursor)
-    return None
+    return responseError
