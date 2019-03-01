@@ -58,9 +58,10 @@ def create_group(payload):
 def get_group(payload):
     errors = []
     response = {}
+    channels = []
 
     try:
-        result = get_groupies(payload)
+        result = get_groupies(payload, channels)
 
         if isError(result):
             errors.append(result)

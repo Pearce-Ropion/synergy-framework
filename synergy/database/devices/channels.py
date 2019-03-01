@@ -5,7 +5,7 @@ from ...api.utils.reporter import isError, reportError
 from ..utils import listify
 
 
-def get_channels(payload, isDeviceQuery=False):
+def get_channels(payload, isDeviceQuery = False):
     conn, cursor = connectDB()
 
     key = 'deviceID' if isDeviceQuery else 'channelID'

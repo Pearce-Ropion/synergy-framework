@@ -5,7 +5,8 @@ from .channels import get_channels
 from ...api.utils.reporter import isError, reportError
 from ..utils import listify
 
-def get_device(payload, isGroupQuery = False):
+
+def get_device(payload, isGroupQuery = False, groupChannels = []):
     conn, cursor = connectDB()
 
     try:
@@ -35,6 +36,7 @@ def get_device(payload, isGroupQuery = False):
                     closeDB(conn, cursor)
                     return responseError
 
+                groupChannels.extend(channels)
                 result = {
                     'deviceID': device['deviceID'],
                     'name': device['name'],

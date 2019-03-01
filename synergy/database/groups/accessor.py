@@ -149,7 +149,7 @@ def get_group_name(payload):
     return responseError
 
 
-def get_groupies(payload):
+def get_groupies(payload, channels = []):
     conn, cursor = connectDB()
 
     try:
@@ -177,13 +177,14 @@ def get_groupies(payload):
             'groups': [],
             'devices': [],
             'channels': [],
+            'allChannels': [],
         }
         if len(members) > 0:
             for member in members:
                 if member['type'] == 'group':
                     result = get_groupies({
                         'groupID': member['uuid'],
-                    })
+                    }, channels)
 
                     if isError(result):
                         closeDB(conn, cursor)
@@ -194,7 +195,7 @@ def get_groupies(payload):
                 elif member['type'] == 'device':
                     result = get_device({
                         'deviceID':  member['uuid']
-                    }, True)
+                    }, True, channels)
 
                     if isError(result):
                         closeDB(conn, cursor)
@@ -212,10 +213,12 @@ def get_groupies(payload):
                         return result
 
                     all['channels'].append(result)
+                    channels.append(result)
 
             if len(all['groups']) == 0 and len(all['devices']) == 0 and len(all['channels']) == 0:
                 return members
 
+            all['allChannels'] = channels
             return all
         else:
             responseError = reportError(
