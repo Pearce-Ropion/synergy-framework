@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 
-from ...database.groups.caller import create_group, get_group, update_group, delete_group
+from ...database.groups.caller import create_group, get_group, update_group, delete_group, all_groups
 from ...api.utils.response import responseSuccess, responseError, defaultResponse
 from ...api.utils.reporter import reportError
 

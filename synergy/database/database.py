@@ -36,7 +36,7 @@ def closeDB(conn, cursor):
 
     except Exception as error:
         response = reportError(
-            'Error connections to Synergy database', error)
+            'SQL Error: Unable to close database connection', error)
         return response
 
     return

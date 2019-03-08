@@ -260,7 +260,7 @@ def delete_groupies(payload):
     closeDB(conn, cursor)
     return responseError
 
-def get_groups(payload):
+def get_all_groups():
     conn, cursor = connectDB()
 
     try:
@@ -268,8 +268,10 @@ def get_groups(payload):
 
         try:
             cursor.execute(query)
+            groups = cursor.fetchall()
             closeDB(conn, cursor)
-            return {}
+
+            return groups if len(groups) else []
 
         except Exception as error:
             responseError = reportError(

@@ -88,12 +88,15 @@ def update_device(payload):
     return responseError
 
 def get_all_devices(payload):
-        conn, cursor = connectDB()
+    conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT name, deviceID FROM devices '''
+        query = ''' SELECT * FROM devices '''
         cursor.execute(query)
         devices = cursor.fetchall()
+        closeDB(conn, cursor)
+
+        return devices if len(devices) else []
     
     except Exception as error:
         responseError = reportError(

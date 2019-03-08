@@ -1,7 +1,7 @@
 from uuid import uuid4 as uuidv4
 
 from ...api.utils.reporter import isError, reportError
-from .accessor import set_group_name, add_groupie, remove_groupie, get_group_name, get_groupies, delete_grouping, delete_groupies
+from .accessor import set_group_name, add_groupie, remove_groupie, get_group_name, get_groupies, delete_grouping, delete_groupies, get_all_groups
 
 def create_group(payload):
     group_id = str(uuidv4())
@@ -216,12 +216,11 @@ def delete_group(payload):
 
 
 def all_groups(payload):
-    # Payload is empty object
     errors = []
     response = {}
 
     try:
-        result = get_groups(payload)
+        result = get_all_groups()
 
         if isError(result):
             errors.append(result)
@@ -230,7 +229,7 @@ def all_groups(payload):
 
     except Exception as error:
         errors.append(reportError(
-            'An error occured deleting the group with the specified ID: {}'.format(payload['groupID']), error))
+            'An error occured retrieving all available groups', error))
 
     if len(errors) > 0:
         return {

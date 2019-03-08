@@ -68,10 +68,12 @@ def get_all_channels(payload):
     conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT name, channelID FROM channels '''
-
+        query = ''' SELECT * FROM channels '''
         cursor.execute(query)
         channels = cursor.fetchall()
+        closeDB(conn, cursor)
+
+        return channels if len(channels) else []
 
     except Exception as error:
         responseError = reportError(
