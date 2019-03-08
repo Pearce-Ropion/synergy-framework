@@ -86,3 +86,22 @@ def update_device(payload):
         'An error occured updating the name of the channel with the specified ID: {}'.format(payload['channelID']), None)
     closeDB(conn, cursor)
     return responseError
+
+def get_all_devices(payload):
+        conn, cursor = connectDB()
+
+    try:
+        query = ''' SELECT name, deviceID FROM devices '''
+        cursor.execute(query)
+        devices = cursor.fetchall()
+    
+    except Exception as error:
+        responseError = reportError(
+            'SQL ERROR: An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), error)
+        closeDB(conn, cursor)
+        return responseError
+
+    responseError = reportError(
+        'An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), None)
+    closeDB(conn, cursor)
+    return responseError
