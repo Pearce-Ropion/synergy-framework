@@ -259,3 +259,31 @@ def delete_groupies(payload):
         'An error occured deleting the members of the group with the specified ID', None)
     closeDB(conn, cursor)
     return responseError
+
+def get_groups(payload):
+    conn, cursor = connectDB()
+
+    try:
+        query = ''' SELECT name, groupID FROM groups ''' % ()
+
+        try:
+            cursor.execute(query)
+            closeDB(conn, cursor)
+            return {}
+
+        except Exception as error:
+            responseError = reportError(
+                'SQL ERROR: An error occured getting all groups', error)
+            closeDB(conn, cursor)
+            return responseError
+
+    except Exception as error:
+        responseError = reportError(
+            'An error occured getting all groups', error)
+        closeDB(conn, cursor)
+        return responseError
+
+    responseError = reportError(
+        'An error occured getting all groups', None)
+    closeDB(conn, cursor)
+    return responseError

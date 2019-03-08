@@ -12,6 +12,7 @@ def switch_action(type):
         'get': get_group,
         'update': update_group,
         'delete': delete_group,
+        'all' : all_groups,
     }
     return actions.get(type, defaultResponse)
 

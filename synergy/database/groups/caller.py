@@ -213,3 +213,31 @@ def delete_group(payload):
         }
 
     return response
+
+
+def all_groups(payload):
+    # Payload is empty object
+    errors = []
+    response = {}
+
+    try:
+        result = get_groups(payload)
+
+        if isError(result):
+            errors.append(result)
+        else:
+            response = result
+
+    except Exception as error:
+        errors.append(reportError(
+            'An error occured deleting the group with the specified ID: {}'.format(payload['groupID']), error))
+
+    if len(errors) > 0:
+        return {
+            'error': True,
+            'errors': errors,
+        }
+
+    return response
+
+    
