@@ -264,7 +264,7 @@ def get_groups(payload):
     conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT name, groupID FROM groups ''' % ()
+        query = ''' SELECT name, groupID FROM groups '''
 
         try:
             cursor.execute(query)
