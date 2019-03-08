@@ -63,3 +63,23 @@ def update_channel(payload):
         'An error occured updating the name of the channel with the specified ID: {}'.format(payload['channelID']), None)
     closeDB(conn, cursor)
     return responseError
+
+def get_all_channels(payload):
+    conn, cursor = connectDB()
+
+    try:
+        query = ''' SELECT name, channelID FROM channels '''
+
+        cursor.execute(query)
+        channels = cursor.fetchall()
+
+    except Exception as error:
+        responseError = reportError(
+            'An error occured getting the channels with the specified ID', error)
+        closeDB(conn, cursor)
+        return responseError
+
+    responseError = reportError(
+        'An error occured getting the channels with the specified ID', None)
+    closeDB(conn, cursor)
+    return responseError
