@@ -260,32 +260,48 @@ def delete_groupies(payload):
     closeDB(conn, cursor)
     return responseError
 
-def get_all_groups():
+
+def get_count(payload):
     conn, cursor = connectDB()
 
+    accumulator = {}
+
     try:
-        query = ''' SELECT name, groupID FROM groups '''
+        query = ''' SELECT COUNT(*) FROM groups '''
+        cursor.execute(query)
+        count = cursor.fetchall()
 
-        try:
-            cursor.execute(query)
-            groups = cursor.fetchall()
-            closeDB(conn, cursor)
-
-            return groups if len(groups) else []
-
-        except Exception as error:
-            responseError = reportError(
-                'SQL ERROR: An error occured getting all groups', error)
-            closeDB(conn, cursor)
-            return responseError
+        accumulator['groups'] = count
 
     except Exception as error:
         responseError = reportError(
-            'An error occured getting all groups', error)
+            'SQL ERROR: An error occured getting the number of groups', error)
         closeDB(conn, cursor)
         return responseError
 
-    responseError = reportError(
-        'An error occured getting all groups', None)
+    try:
+        query = ''' SELECT COUNT(*) FROM devices '''
+        cursor.execute(query)
+        count = cursor.fetchall()
+
+        accumulator['devices'] = count
+
+    except Exception as error:
+        responseError = reportError('SQL ERROR: An error occured getting the number of groups', error)
+        closeDB(conn, cursor)
+        return responseError
+
+    try:
+        query = ''' SELECT COUNT(*) FROM channels '''
+        cursor.execute(query)
+        count = cursor.fetchall()
+
+        accumulator['channels'] = count
+
+    except Exception as error:
+        responseError = reportError('SQL ERROR: An error occured getting the number of groups', error)
+        closeDB(conn, cursor)
+        return responseError
+
     closeDB(conn, cursor)
-    return responseError
+    return accumulator
