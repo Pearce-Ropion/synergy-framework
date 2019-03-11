@@ -1,13 +1,13 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from ...database.devices.channels import get_channels, update_channel, get_all_channels
+from ...database.devices.channels import get_channels, update_channel, get_channels_multiplex
 import json
 
 def switch_action(type):
     actions = {
         'get': get_channels,
         'update': update_channel,
-        'all' : get_all_channels,
+        'multiplex' : get_channels_multiplex,
     }
     return actions.get(type, defaultResponse)
 
