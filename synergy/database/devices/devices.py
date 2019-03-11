@@ -87,24 +87,72 @@ def update_device(payload):
     closeDB(conn, cursor)
     return responseError
 
-def get_all_devices(payload):
+# def get_all_devices(payload):
+#     conn, cursor = connectDB()
+
+#     try:
+#         query = ''' SELECT * FROM devices '''
+#         cursor.execute(query)
+#         devices = cursor.fetchall()
+#         closeDB(conn, cursor)
+
+#         return devices if len(devices) else []
+    
+#     except Exception as error:
+#         responseError = reportError(
+#             'SQL ERROR: An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), error)
+#         closeDB(conn, cursor)
+#         return responseError
+
+#     responseError = reportError(
+#         'An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), None)
+#     closeDB(conn, cursor)
+#     return responseError
+
+def get_devices(payload):
     conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT * FROM devices '''
+        query = ''' SELECT deviceID FROM devices ORDER BY name ASC LIMIT %s, %s''' % (
+            payload['offset'], payload['count'])
+        
         cursor.execute(query)
-        devices = cursor.fetchall()
+        deviceIDs = cursor.fetchall()
         closeDB(conn, cursor)
 
-        return devices if len(devices) else []
-    
+        try:
+
+            result = []
+            errors = []
+
+            for deviceID in deviceIDs:
+                device = get_device(deviceID)
+                if isError(group):
+                    errors.append(device)
+                else
+                    result.append(device)
+
+            if len(errors) > 0:
+                return {
+                    'error': True,
+                    'errors': errors,
+                }
+
+            return result
+
+        except Exception as error:
+            responseError = reportError(
+                'SQL ERROR: An error occurred while retrieving devices', error)
+            closeDB(conn, cursor)
+            return responseError
+
     except Exception as error:
         responseError = reportError(
-            'SQL ERROR: An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), error)
+            'An error occurred while retrieving devices', error)
         closeDB(conn, cursor)
         return responseError
 
     responseError = reportError(
-        'An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), None)
+        'An error occurred retrieving devices', None)
     closeDB(conn, cursor)
     return responseError

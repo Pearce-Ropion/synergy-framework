@@ -1,13 +1,13 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from ...database.devices.devices import get_device, update_device, get_all_devices
+from ...database.devices.devices import get_device, update_device, get_devices
 import json
 
 def switch_action(type):
     actions = {
         'get': get_device,
         'update': update_device,
-        'all' : get_all_devices,
+        'multiplex' : get_devices,
     }
     return actions.get(type, defaultResponse)
 
