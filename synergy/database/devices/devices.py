@@ -87,29 +87,7 @@ def update_device(payload):
     closeDB(conn, cursor)
     return responseError
 
-# def get_all_devices(payload):
-#     conn, cursor = connectDB()
-
-#     try:
-#         query = ''' SELECT * FROM devices '''
-#         cursor.execute(query)
-#         devices = cursor.fetchall()
-#         closeDB(conn, cursor)
-
-#         return devices if len(devices) else []
-    
-#     except Exception as error:
-#         responseError = reportError(
-#             'SQL ERROR: An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), error)
-#         closeDB(conn, cursor)
-#         return responseError
-
-#     responseError = reportError(
-#         'An error occured getting the device with the specified ID: {}'.format(payload['deviceID']), None)
-#     closeDB(conn, cursor)
-#     return responseError
-
-def get_devices(payload):
+def multiplex_devices(payload):
     conn, cursor = connectDB()
 
     try:
@@ -127,9 +105,9 @@ def get_devices(payload):
 
             for deviceID in deviceIDs:
                 device = get_device(deviceID)
-                if isError(group):
+                if isError(device):
                     errors.append(device)
-                else
+                else:
                     result.append(device)
 
             if len(errors) > 0:

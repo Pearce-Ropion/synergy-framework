@@ -64,30 +64,8 @@ def update_channel(payload):
     closeDB(conn, cursor)
     return responseError
 
-# def get_all_channels(payload):
-#     conn, cursor = connectDB()
 
-#     try:
-#         query = ''' SELECT * FROM channels '''
-#         cursor.execute(query)
-#         channels = cursor.fetchall()
-#         closeDB(conn, cursor)
-
-#         return channels if len(channels) else []
-
-#     except Exception as error:
-#         responseError = reportError(
-#             'An error occured getting the channels with the specified ID', error)
-#         closeDB(conn, cursor)
-#         return responseError
-
-#     responseError = reportError(
-#         'An error occured getting the channels with the specified ID', None)
-#     closeDB(conn, cursor)
-#     return responseError
-
-
-def get_channels_multiplex(payload):
+def multiplex_channels(payload):
     conn, cursor = connectDB()
 
     try:

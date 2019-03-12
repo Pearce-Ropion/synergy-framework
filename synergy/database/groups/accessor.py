@@ -259,3 +259,51 @@ def delete_groupies(payload):
         'An error occured deleting the members of the group with the specified ID', None)
     closeDB(conn, cursor)
     return responseError
+
+
+def multiplex_groups(payload):
+    conn, cursor = connectDB()
+
+    try:
+        query = ''' SELECT groupID FROM groups ORDER BY name ASC LIMIT %s, %s''' % (
+            payload['offset'], payload['count'])
+
+        cursor.execute(query)
+        groupIDs = cursor.fetchall()
+        closeDB(conn, cursor)
+
+        try:
+
+            result = []
+            errors = []
+
+            for groupID in groupIDs:
+                group = get_groupies(groupID)
+                if isError(group):
+                    errors.append(group)
+                else:
+                    result.append(group)
+
+            if len(errors) > 0:
+                return {
+                    'error': True,
+                    'errors': errors,
+                }
+
+            return result
+
+        except Exception as error:
+            responseError = reportError(
+                'An error occured retrieving group members', error)
+            return responseError
+
+    except Exception as error:
+        responseError = reportError(
+            'An error occured retrieving groups', error)
+        closeDB(conn, cursor)
+        return responseError
+
+    responseError = reportError(
+        'An error occured retrieving groups', None)
+    closeDB(conn, cursor)
+    return responseError

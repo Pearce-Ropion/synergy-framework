@@ -1,7 +1,7 @@
 from uuid import uuid4 as uuidv4
 
 from ...api.utils.reporter import isError, reportError
-from .accessor import set_group_name, add_groupie, remove_groupie, get_group_name, get_groupies, delete_grouping, delete_groupies, get_all_groups
+from .accessor import set_group_name, add_groupie, remove_groupie, get_group_name, get_groupies, delete_grouping, delete_groupies
 
 def create_group(payload):
     group_id = str(uuidv4())
@@ -213,59 +213,3 @@ def delete_group(payload):
         }
 
     return response
-
-
-def get_groups(payload):
-    #payload is the count and the offset
-    #query for groupIDs from groups table in a for loop for each groupID from offset to count
-    #on each groupID, run get_group()
-        #this will get all members of the groups
-
-    conn, cursor = connectDB()
-
-    try:
-        query = ''' SELECT groupID FROM groups ORDER BY name ASC LIMIT %s, %s''' % (
-            payload['offset'], payload['count'])
-        
-        cursor.execute(query)
-        groupIDs = cursor.fetchall()
-        closeDB(conn, cursor)
-
-        try:
-
-            result = []
-            errors = []
-
-            for groupID in groupIDs:
-                group = get_groupies(groupID)
-                if isError(group):
-                    errors.append(group)
-                else
-                    result.append(group)
-
-            if len(errors) > 0:
-                return {
-                    'error': True,
-                    'errors': errors,
-                }
-
-            return result
-
-        except Exception as error:
-            responseError = reportError(
-                'SQL ERROR: An error occured retrieving groups', error)
-            closeDB(conn, cursor)
-            return responseError
-
-    except Exception as error:
-        responseError = reportError(
-            'An error occured retrieving groups', error)
-        closeDB(conn, cursor)
-        return responseError
-
-    responseError = reportError(
-        'An error occured retrieving groups', None)
-    closeDB(conn, cursor)
-    return responseError
-
-    

@@ -1,7 +1,8 @@
 from pyramid.view import view_config
 from pyramid.response import Response
 
-from ...database.groups.caller import create_group, get_group, update_group, delete_group, all_groups
+from ...database.groups.caller import create_group, get_group, update_group, delete_group
+from ...database.groups.accessor import multiplex_groups
 from ...api.utils.response import responseSuccess, responseError, defaultResponse
 from ...api.utils.reporter import reportError
 
@@ -12,7 +13,7 @@ def switch_action(type):
         'get': get_group,
         'update': update_group,
         'delete': delete_group,
-        'multiplex': get_groups,
+        'multiplex': multiplex_groups,
     }
     return actions.get(type, defaultResponse)
 
