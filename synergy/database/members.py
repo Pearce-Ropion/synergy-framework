@@ -1,3 +1,4 @@
+from .database import connectDB, closeDB
 from .devices.devices import get_device
 from .devices.channels import get_channels
 
@@ -59,3 +60,27 @@ def get_members(members, accumulator, channels=[]):
 
     responseError = reportError('An error occured getting the members with the specified IDs', None)
     return responseError
+
+
+def get_count(payload):
+    conn, cursor = connectDB()
+
+    options = ['groups', 'devices', 'channels']
+    accumulator = {}
+
+    for option in options:
+        try:
+            if payload[option]:
+                query = ''' SELECT COUNT(*) FROM %s ''' % (option)
+                cursor.execute(query)
+                count = cursor.fetchall()
+                accumulator[option] = count
+            
+        except Exception as error:
+            responseError = reportError(
+                'SQL ERROR: An error occured getting the number of {}'.format(option), error)
+            closeDB(conn, cursor)
+            return responseError
+
+    closeDB(conn, cursor)
+    return accumulator

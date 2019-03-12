@@ -1,7 +1,8 @@
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
-    config.add_route('login', '/login')
+    config.add_route('login', '/api/login')
+    config.add_route('count', '/api/count')
     config.add_route('user', '/api/user')
     config.add_route('usage', '/api/usage')
     config.add_route('members', '/api/members')
