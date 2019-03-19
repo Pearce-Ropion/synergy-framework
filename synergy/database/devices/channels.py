@@ -69,7 +69,7 @@ def multiplex_channels(payload):
     conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT * FROM channels ORDER BY name ASC LIMIT %s, %s''' % (
+        query = ''' SELECT * FROM channels ORDER BY channelID ASC LIMIT %s, %s''' % (
             payload['offset'], payload['count'])
         
         cursor.execute(query)

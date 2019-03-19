@@ -4,10 +4,14 @@ import mysql.connector as mariadb
 
 from ..api.utils.reporter import reportError
 
+use_external = True
+external_host = '24.130.208.33'
+internal_host = '192.168.0.39'
+
 config = {
     'user': 'synergy',
     'password': 'wonderland',
-    'host': '192.168.0.39',
+    'host': external_host if use_external else internal_host,
     'port': 3306,
     'database': 'synergy',
     'raise_on_warnings': True

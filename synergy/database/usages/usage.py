@@ -19,7 +19,7 @@ def usage(payload):
             after_clause = ' AND time >= {}'.format(payload['after'])
             include_where_clause = True
             if is_inital_param:
-                after_clause = after_clause[3:]
+                after_clause = after_clause[4:]
                 is_inital_param = False
         if 'before' in payload:
             # Any time before the give value (inclusive)
@@ -28,16 +28,21 @@ def usage(payload):
             if is_inital_param:
                 before_clause = before_clause[4:]
                 is_inital_param = False
+        if payload['limit'] > 1:
+            after_clause = ''
+            before_clause = ''
+            include_where_clause = False
 
         try:
             if is_cumulative:
                 where_clause = ' WHERE' if include_where_clause else ''
-                query = ''' SELECT * FROM usages%s%s%s ''' % (where_clause, after_clause, before_clause)
+                # query = ''' SELECT * FROM usages%s%s%s ORDER BY id DESC LIMIT %s''' % (where_clause, after_clause, before_clause, payload['limit'])
+                query = 'SELECT * FROM usages ORDER BY id DESC LIMIT 1 '
 
                 try:
                     cursor.execute(query)
                     currents = cursor.fetchall()
-                    print(currents)
+                    # print(currents)
 
                     if len(currents):
                         payload['currents'] = currents

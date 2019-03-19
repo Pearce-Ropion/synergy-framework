@@ -91,7 +91,7 @@ def multiplex_devices(payload):
     conn, cursor = connectDB()
 
     try:
-        query = ''' SELECT deviceID FROM devices ORDER BY name ASC LIMIT %s, %s''' % (
+        query = ''' SELECT deviceID FROM devices ORDER BY deviceID ASC LIMIT %s, %s''' % (
             payload['offset'], payload['count'])
         
         cursor.execute(query)

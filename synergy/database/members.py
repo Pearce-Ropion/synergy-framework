@@ -70,11 +70,11 @@ def get_count(payload):
 
     for option in options:
         try:
-            if payload[option]:
+            if option in payload and payload[option]:
                 query = ''' SELECT COUNT(*) FROM %s ''' % (option)
                 cursor.execute(query)
-                count = cursor.fetchall()
-                accumulator[option] = count
+                counts = cursor.fetchall()
+                accumulator[option] = counts[0]['COUNT(*)']
             
         except Exception as error:
             responseError = reportError(

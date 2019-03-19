@@ -38,7 +38,7 @@ def count_handler(request):
             if 'error' not in response:
                 return responseSuccess(response, actionType)
             else:
-               return responseError(response['errors'], actionType, 400)
+               return responseError(response['error'], actionType, 400)
  
         except Exception as error:
             response = reportError('An error occured handing the count request', error)
